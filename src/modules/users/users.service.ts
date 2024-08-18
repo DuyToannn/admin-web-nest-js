@@ -7,6 +7,10 @@ import mongoose, { Model } from 'mongoose';
 import { hashPasswordHelper } from '@/helpers/utils'
 import aqp from 'api-query-params';
 import { query } from 'express';
+import { v4 as uuidv4 } from 'uuid';
+
+import { CreateAuthDto } from '@/auth/dto/create-auth.dto';
+import dayjs from 'dayjs';
 @Injectable()
 export class UsersService {
   constructor(@InjectModel(User.name)
@@ -69,5 +73,26 @@ export class UsersService {
     } else {
       throw new BadGatewayException('ID format is incorrect')
     }
+  }
+  async handleRegister(registerDto: CreateAuthDto) {
+    const { name, email, password } = registerDto;
+    //check email
+    const isExist = await this.isEmailExist(email);
+    if (isExist) {
+      throw new BadRequestException(`Email is Exist : ${email}`)
+    }
+
+    //hash password
+    const hashPassword = await hashPasswordHelper(password)
+    const user = await this.userModel.create({
+      name, email, password: hashPassword,
+      isActive: false,
+      codeId: uuidv4(),
+      codeExpired: dayjs().add(1, 'minutes')
+    })
+    return {
+      _id: user._id
+    }
+    //send email
   }
 }
