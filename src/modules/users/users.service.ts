@@ -11,10 +11,13 @@ import { v4 as uuidv4 } from 'uuid';
 
 import { CreateAuthDto } from '@/auth/dto/create-auth.dto';
 import dayjs from 'dayjs';
+import { MailerService } from '@nestjs-modules/mailer';
 @Injectable()
 export class UsersService {
   constructor(@InjectModel(User.name)
-  private userModel: Model<User>) { }
+  private userModel: Model<User>,
+    private readonly mailerService: MailerService
+  ) { }
   isEmailExist = async (email: string) => {
     const user = await this.userModel.exists({ email });
     if (user) return true;
@@ -83,16 +86,29 @@ export class UsersService {
     }
 
     //hash password
+    const codeID = uuidv4();
     const hashPassword = await hashPasswordHelper(password)
     const user = await this.userModel.create({
       name, email, password: hashPassword,
       isActive: false,
-      codeId: uuidv4(),
+      codeId: codeID,
       codeExpired: dayjs().add(1, 'minutes')
     })
+    //send email
+    this.mailerService.sendMail({
+      to: user.email,
+      subject: 'Active your account at @DuyToan',
+      text: 'welcome', 
+      template: 'register',
+      context: {
+        name: user.name ?? user.email,
+        activationCode: codeID
+      }
+    })
+
     return {
       _id: user._id
     }
-    //send email
+
   }
 }
