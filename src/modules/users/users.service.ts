@@ -9,7 +9,7 @@ import aqp from 'api-query-params';
 import { query } from 'express';
 import { v4 as uuidv4 } from 'uuid';
 
-import { CreateAuthDto } from '@/auth/dto/create-auth.dto';
+import { CodeAuthDto, CreateAuthDto } from '@/auth/dto/create-auth.dto';
 import dayjs from 'dayjs';
 import { MailerService } from '@nestjs-modules/mailer';
 @Injectable()
@@ -98,7 +98,7 @@ export class UsersService {
     this.mailerService.sendMail({
       to: user.email,
       subject: 'Active your account at @DuyToan',
-      text: 'welcome', 
+      text: 'welcome',
       template: 'register',
       context: {
         name: user.name ?? user.email,
@@ -108,6 +108,26 @@ export class UsersService {
 
     return {
       _id: user._id
+    }
+
+  }
+
+  async handleActive(data: CodeAuthDto) {
+    const user = await this.userModel.findOne({
+      _id: data._id,
+      codeId: data.code
+    })
+    if (!user) {
+      throw new BadRequestException("Mã code không hợp lệ hoặc đã hết hạn")
+    }
+    const isBeforeCheck = dayjs().isBefore(user.codeExpired)
+    if (isBeforeCheck) {
+      await this.userModel.updateOne({ _id: data._id }, {
+        isActive: true
+      })
+      return { isBeforeCheck };
+    } else {
+      throw new BadGatewayException("Mã code đã hết hạn")
     }
 
   }
