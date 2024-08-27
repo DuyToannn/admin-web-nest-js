@@ -5,7 +5,7 @@ import { LocalAuthGuard } from './passport/local-auth.guard';
 import { JwtAuthGuard } from './passport/jwt-auth.guard';
 import { Public, ResponseMessage } from '@/decorator/customize';
 import { register } from 'module';
-import { CreateAuthDto, CodeAuthDto } from './dto/create-auth.dto';
+import { CreateAuthDto, CodeAuthDto, ChangePasswordAuthDto } from './dto/create-auth.dto';
 import { MailerService } from '@nestjs-modules/mailer';
 
 @Controller('auth')
@@ -23,6 +23,11 @@ export class AuthController {
     return this.authService.login(req.user);
   }
 
+  @Post('logout')
+  @Public()
+  async logout(@Body('email') email: string) {
+    return this.authService.logout(email);
+  }
 
   @Post('register')
   @Public()
@@ -36,15 +41,33 @@ export class AuthController {
     return this.authService.checkCode(data);
   }
 
+
+  @Post('retry-active')
+  @Public()
+  retryActive(@Body("email") email: string) {
+    return this.authService.retryAtive(email);
+  }
+
+  @Post('retry-password')
+  @Public()
+  retryPassword(@Body("email") email: string) {
+    return this.authService.retryPassword(email);
+  }
+  @Post('change-password')
+  @Public()
+  changePassword(@Body() data: ChangePasswordAuthDto) {
+    return this.authService.changePassword(data);
+  }
+
   @Get('mail')
   @Public()
   testMail() {
     this.mailerService
       .sendMail({
-        to: 'doduytoann@gmail.com', // list of receivers
-        from: 'noreply@nestjs.com', // sender address
-        subject: 'Testing Nest MailerModule ✔', // Subject line
-        text: 'welcome', // plaintext body
+        to: 'doduytoann@gmail.com',
+        from: 'noreply@nestjs.com',
+        subject: 'Testing Nest MailerModule ✔',
+        text: 'welcome',
         template: 'register',
         context: {
           name: 'Duy Toan',

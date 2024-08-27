@@ -26,9 +26,10 @@ export class UsersController {
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.usersService.findOne(+id);
+    return this.usersService.findOne(id);
   }
 
+  @Public()
   @Put()
   update(@Body() updateUserDto: UpdateUserDto) {
     return this.usersService.update(updateUserDto);
@@ -38,4 +39,6 @@ export class UsersController {
   remove(@Param('id') id: string) {
     return this.usersService.remove(id);
   }
+
+
 }

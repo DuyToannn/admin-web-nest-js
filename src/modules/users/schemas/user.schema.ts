@@ -37,7 +37,8 @@ export class User {
 
     @Prop()
     codeExpired: Date;
-
+    @Prop({ default: false })
+    isOnline: boolean;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);
