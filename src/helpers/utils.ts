@@ -17,3 +17,9 @@ export const comparePasswordHelper = async (plainPassword: string, hashPassword:
         console.log(error);
     }
 }
+
+export const getUidFromUrl = (url: string): string | null => {
+    const regex = /\/file\/d\/([^/]+)\//;
+    const match = url.match(regex);
+    return match ? match[1] : null;
+  };

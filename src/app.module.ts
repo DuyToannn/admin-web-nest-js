@@ -11,8 +11,14 @@ import { MailerModule } from '@nestjs-modules/mailer';
 import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
 import { TransformInterceptor } from './core/transform.interceptor';
 import { EventsModule } from './modules/events/events.module';
+import { VideosModule } from './modules/videos/videos.module';
+import { CategoriesModule } from './modules/categories/categories.module';
+import { CloudinaryModule } from './modules/cloudinary/cloudinary.module';
 @Module({
   imports: [
+    CloudinaryModule,
+    CategoriesModule,
+    VideosModule,
     UsersModule,
     EventsModule,
     ConfigModule.forRoot({ isGlobal: true }),
@@ -52,6 +58,9 @@ import { EventsModule } from './modules/events/events.module';
       inject: [ConfigService],
 
     }),
+    VideosModule,
+    CategoriesModule,
+    CloudinaryModule,
   ],
   controllers: [AppController],
   providers: [
