@@ -70,18 +70,37 @@ export class CategoriesService {
     }
     return category;
   }
-
-  async update(updateCategoryDto: UpdateCategoryDto, ) {
+  async update(
+    updateCategoryDto: UpdateCategoryDto,
+    userId: Types.ObjectId
+  ): Promise<any> {
+    const category = await this.categoryModel.findOne({
+      _id: updateCategoryDto._id,
+      userId: userId
+    });
+    if (!category) {
+      throw new Error('You do not have permission to update this directory');
+    }
 
     return await this.categoryModel.updateOne(
-      { _id: updateCategoryDto._id }, { ...updateCategoryDto }
+      { _id: updateCategoryDto._id },
+      { ...updateCategoryDto }
     );
   }
-  async remove(_id: string) {
-    if (mongoose.isValidObjectId(_id)) {
-      return this.categoryModel.deleteOne({ _id })
-    } else {
-      throw new BadRequestException("Id không đúng định dạng mongodb")
+  async remove(
+    _id: string,
+    userId: Types.ObjectId
+  ): Promise<any> {
+    if (!mongoose.isValidObjectId(_id)) {
+      throw new BadRequestException("Id is not in correct mongodb format");
     }
+    const category = await this.categoryModel.findOne({
+      _id,
+      userId
+    });
+    if (!category) {
+      throw new Error('You do not have permission to delete this category');
+    }
+    return this.categoryModel.deleteOne({ _id });
   }
 }

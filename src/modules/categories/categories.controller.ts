@@ -56,13 +56,18 @@ export class CategoriesController {
     return category;
   }
   @Put()
-  @Public()
-  async update(@Body() updateCategoryDto: UpdateCategoryDto) {
-    return this.categoriesService.update(updateCategoryDto);
+
+  async update(@Body() updateCategoryDto: UpdateCategoryDto, @Req() req: Request
+  ) {
+    const user = req.user as UserDocument;
+    const userId = user._id;
+    return this.categoriesService.update(updateCategoryDto, userId);
   }
-  @Public()
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.categoriesService.remove(id);
+
+  @Delete(':id') remove(@Param('id') id: string, @Req() req: Request
+  ) {
+    const user = req.user as UserDocument;
+    const userId = user._id;
+    return this.categoriesService.remove(id, userId);
   }
 }
