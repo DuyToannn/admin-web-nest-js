@@ -11,15 +11,33 @@ export class CategoriesService {
   constructor(@InjectModel(Category.name) private categoryModel: Model<Category>) { }
 
   //add cate
-  async create(createCategoryDto: CreateCategoryDto): Promise<Category> {
-    const createdCategory = new this.categoryModel(createCategoryDto);
+  async create(createCategoryDto: CreateCategoryDto, userId: Types.ObjectId): Promise<Category> {
+
+    const categoryWithUserId = {
+      ...createCategoryDto,
+      userId
+    };
+
+    const createdCategory = new this.categoryModel(categoryWithUserId);
     return createdCategory.save();
   }
 
-  async findAll(query: string, current: number, pageSize: number) {
+
+  async findAllCategories(): Promise<Category[]> {
+    try {
+      return await this.categoryModel.find().exec();
+    } catch (error) {
+      throw new Error(`Failed to fetch categories: ${error.message}`);
+    }
+  }
+
+  async findAll(query: string, current: number, pageSize: number, userId: Types.ObjectId) {
     const { filter, sort } = aqp(query);
     if (filter.current) delete filter.current;
     if (filter.pageSize) delete filter.pageSize;
+
+    // Lọc theo userId
+    filter['userId'] = userId;
 
     if (!current) current = 1;
     if (!pageSize) pageSize = 10;
@@ -27,7 +45,7 @@ export class CategoriesService {
     const totalItems = (await this.categoryModel.find(filter)).length;
     const totalPages = Math.ceil(totalItems / pageSize);
 
-    const skip = (current - 1) * (pageSize);
+    const skip = (current - 1) * pageSize;
 
     const results = await this.categoryModel
       .find(filter)
@@ -43,19 +61,17 @@ export class CategoriesService {
       },
       results //kết quả query
     }
-
-
   }
 
-  async findOne(id: Types.ObjectId): Promise<Category> {
-    const category = await this.categoryModel.findById(id).exec();
+  async findOne(id: Types.ObjectId, userId: Types.ObjectId): Promise<Category> {
+    const category = await this.categoryModel.findOne({ _id: id, userId }).exec();
     if (!category) {
-      throw new NotFoundException('Category not found');
+      throw new NotFoundException('Category not found or you do not have access to it');
     }
     return category;
   }
 
-  async update(updateCategoryDto: UpdateCategoryDto) {
+  async update(updateCategoryDto: UpdateCategoryDto, ) {
 
     return await this.categoryModel.updateOne(
       { _id: updateCategoryDto._id }, { ...updateCategoryDto }

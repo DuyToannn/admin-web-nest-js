@@ -16,12 +16,15 @@ export class VideosService {
     private cloudinaryService: CloudinaryService
   ) { }
   async create(createVideoDto: CreateVideoDto, userId: Types.ObjectId, file?: Express.Multer.File): Promise<Video> {
+    // Kiểm tra tính hợp lệ của danh mục nếu có
     if (createVideoDto.category) {
-      const category = await this.categoriesService.findOne(createVideoDto.category);
+      const category = await this.categoriesService.findOne(createVideoDto.category, userId);
       if (!category) {
-        throw new NotFoundException('Category not found');
+        throw new NotFoundException('Category not found or you do not have access to it');
       }
     }
+  
+    // Kiểm tra và lấy UID từ URL nếu có
     if (createVideoDto.drive_url) {
       const uid = getUidFromUrl(createVideoDto.drive_url);
       if (!uid) {
@@ -29,21 +32,25 @@ export class VideosService {
       }
       createVideoDto.uid = uid;
     }
-
+  
+    // Upload poster nếu có tệp
     let posterUrl: string | undefined;
     if (file) {
-      const uploadResponse = await this.cloudinaryService.uploadImage(file);
-      posterUrl = uploadResponse.secure_url;
+      try {
+        const uploadResponse = await this.cloudinaryService.uploadImage(file);
+        posterUrl = uploadResponse.secure_url;
+      } catch (error) {
+        throw new Error('Failed to upload poster: ' + error.message);
+      }
     }
-
-
+  
+    // Tạo video mới
     const video = new this.videoModel({
       ...createVideoDto,
       userId,
       poster: posterUrl,
     });
     return video.save();
-
   }
 
 

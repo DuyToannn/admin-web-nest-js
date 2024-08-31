@@ -14,14 +14,16 @@ import { EventsModule } from './modules/events/events.module';
 import { VideosModule } from './modules/videos/videos.module';
 import { CategoriesModule } from './modules/categories/categories.module';
 import { CloudinaryModule } from './modules/cloudinary/cloudinary.module';
+import { RolesGuard } from './auth/passport/roles.guard';
+
 @Module({
   imports: [
-    CloudinaryModule,
-    CategoriesModule,
-    VideosModule,
     UsersModule,
     EventsModule,
     ConfigModule.forRoot({ isGlobal: true }),
+    VideosModule,
+    CategoriesModule,
+    CloudinaryModule,
     MongooseModule.forRootAsync({
       imports: [ConfigModule],
       useFactory: async (configService: ConfigService) => ({
@@ -58,9 +60,6 @@ import { CloudinaryModule } from './modules/cloudinary/cloudinary.module';
       inject: [ConfigService],
 
     }),
-    VideosModule,
-    CategoriesModule,
-    CloudinaryModule,
   ],
   controllers: [AppController],
   providers: [
@@ -72,7 +71,11 @@ import { CloudinaryModule } from './modules/cloudinary/cloudinary.module';
     {
       provide: APP_INTERCEPTOR,
       useClass: TransformInterceptor
-    }
+    },
+    {
+      provide: APP_GUARD,
+      useClass: RolesGuard,
+    },
   ],
 })
 export class AppModule { }

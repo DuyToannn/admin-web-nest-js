@@ -23,7 +23,7 @@ export class User {
     @Prop()
     image: string;
 
-    @Prop({ default: "USERS" })
+    @Prop({ type: String, enum: ['admin', 'user'], default: 'user' })
     role: string;
 
     @Prop({ default: "LOCAL" })
