@@ -14,8 +14,6 @@ export class Video {
     @Prop({ required: true })
     title: string;
 
-    @Prop({ required: true })
-    uid: string;
 
     @Prop({ type: Types.ObjectId, ref: Category.name })
     category: Types.ObjectId;
@@ -49,7 +47,7 @@ export class Video {
     embed_url: string;
 
     @Prop()
-    drive_url: string;
+    dropbox_url: string;
 
     // Thông tin về quyền riêng tư và thống kê
     @Prop({ default: false })

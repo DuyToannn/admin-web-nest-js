@@ -13,23 +13,13 @@ import { RolesGuard } from '@/auth/passport/roles.guard';
 export class CategoriesController {
   constructor(private readonly categoriesService: CategoriesService) { }
 
-  @Post()
-  async create(@Body() createCategoryDto: CreateCategoryDto, @Req() req: Request) {
-    const user = req.user as UserDocument;
-    const userId = user._id;
-    return this.categoriesService.create(createCategoryDto, userId);
-  }
-
-
   @Get('all')
   @Roles('admin')
   @UseGuards(RolesGuard)
   async findAllCategories(@Req() req: Request): Promise<Category[]> {
     const user = req.user as UserDocument;
-    console.log('User:', user);
     return this.categoriesService.findAllCategories();
   }
-
 
   @Get()
   findAll(
@@ -48,22 +38,28 @@ export class CategoriesController {
     const user = req.user as UserDocument;
     const userId = user._id;
     const categoryId = new Types.ObjectId(id);
-
     const category = await this.categoriesService.findOne(categoryId, userId);
     if (!category) {
       throw new NotFoundException('Category not found or you do not have access to it');
     }
     return category;
   }
-  @Put()
 
+  @Post()
+  async create(@Body() createCategoryDto: CreateCategoryDto, @Req() req: Request) {
+    const user = req.user as UserDocument;
+    const userId = user._id;
+    return this.categoriesService.create(createCategoryDto, userId);
+  }
+
+
+  @Put()
   async update(@Body() updateCategoryDto: UpdateCategoryDto, @Req() req: Request
   ) {
     const user = req.user as UserDocument;
     const userId = user._id;
     return this.categoriesService.update(updateCategoryDto, userId);
   }
-
   @Delete(':id') remove(@Param('id') id: string, @Req() req: Request
   ) {
     const user = req.user as UserDocument;

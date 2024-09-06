@@ -7,8 +7,6 @@ export class CreateVideoDto {
     @IsString()
     title: string;
 
-    @IsString()
-    uid: string;
 
     @IsOptional()
     @IsString()
@@ -16,7 +14,7 @@ export class CreateVideoDto {
 
     @IsOptional()
     @IsString()
-    status?: string;
+    status?: number;
 
     @IsOptional()
     size?: number;
@@ -31,7 +29,7 @@ export class CreateVideoDto {
 
     @IsOptional()
     @IsString()
-    drive_url?: string;
+    dropbox_url?: string;
 
     @IsOptional()
     isPublic?: boolean;

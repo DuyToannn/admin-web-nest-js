@@ -15,6 +15,7 @@ import { VideosModule } from './modules/videos/videos.module';
 import { CategoriesModule } from './modules/categories/categories.module';
 import { CloudinaryModule } from './modules/cloudinary/cloudinary.module';
 import { RolesGuard } from './auth/passport/roles.guard';
+import { VideoManagementModule } from './modules/video-management/video-management.module';
 
 @Module({
   imports: [
@@ -60,6 +61,7 @@ import { RolesGuard } from './auth/passport/roles.guard';
       inject: [ConfigService],
 
     }),
+    VideoManagementModule,
   ],
   controllers: [AppController],
   providers: [

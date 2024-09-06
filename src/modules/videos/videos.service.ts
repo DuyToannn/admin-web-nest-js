@@ -1,11 +1,11 @@
-import { Inject, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Inject, Injectable, NotFoundException, Type } from '@nestjs/common';
 import { CreateVideoDto } from './dto/create-video.dto';
 import { UpdateVideoDto } from './dto/update-video.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { Video } from './schemas/video.schemas';
-import { Model, Types } from 'mongoose';
+import mongoose, { Model, Types } from 'mongoose';
 import { CategoriesService } from '../categories/categories.service';
-import { getUidFromUrl } from '@/helpers/utils';
+
 import aqp from 'api-query-params';
 import { CloudinaryService } from '../cloudinary/cloudinary.service';
 @Injectable()
@@ -15,25 +15,19 @@ export class VideosService {
     private categoriesService: CategoriesService,
     private cloudinaryService: CloudinaryService
   ) { }
-  async create(createVideoDto: CreateVideoDto, userId: Types.ObjectId, file?: Express.Multer.File): Promise<Video> {
-    // Kiểm tra tính hợp lệ của danh mục nếu có
+  async create(
+    createVideoDto: CreateVideoDto,
+    userId: Types.ObjectId,
+    file?: Express.Multer.File): Promise<Video> {
+
     if (createVideoDto.category) {
       const category = await this.categoriesService.findOne(createVideoDto.category, userId);
       if (!category) {
         throw new NotFoundException('Category not found or you do not have access to it');
       }
     }
-  
-    // Kiểm tra và lấy UID từ URL nếu có
-    if (createVideoDto.drive_url) {
-      const uid = getUidFromUrl(createVideoDto.drive_url);
-      if (!uid) {
-        throw new Error('Invalid Google Drive URL');
-      }
-      createVideoDto.uid = uid;
-    }
-  
-    // Upload poster nếu có tệp
+
+
     let posterUrl: string | undefined;
     if (file) {
       try {
@@ -43,8 +37,7 @@ export class VideosService {
         throw new Error('Failed to upload poster: ' + error.message);
       }
     }
-  
-    // Tạo video mới
+
     const video = new this.videoModel({
       ...createVideoDto,
       userId,
@@ -53,13 +46,19 @@ export class VideosService {
     return video.save();
   }
 
+  async findAllVideos(): Promise<Video[]> {
+    try {
+      return await this.videoModel.find().exec();
+    } catch (error) {
+      throw new Error(`Failed to fetch videos: ${error.message}`);
+    }
+  }
 
-
-  async findAll(query: string, current: number, pageSize: number) {
+  async findAll(query: string, current: number, pageSize: number, userId: Types.ObjectId) {
     const { filter, sort } = aqp(query);
     if (filter.current) delete filter.current;
     if (filter.pageSize) delete filter.pageSize;
-
+    filter['userId'] = userId;
     if (!current) current = 1;
     if (!pageSize) pageSize = 10;
 
@@ -82,15 +81,45 @@ export class VideosService {
     }
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} video`;
+  async findOne(id: Types.ObjectId, userId: Types.ObjectId): Promise<Video> {
+    const video = await this.videoModel.findOne({ _id: id, userId }).exec();
+    if (!video) {
+      throw new NotFoundException('Video not found or you do not have access to it');
+    }
+    return video;
   }
 
-  update(id: number, updateVideoDto: UpdateVideoDto) {
-    return `This action updates a #${id} video`;
+  async update(
+    updateVideoDto: UpdateVideoDto,
+    userId: Types.ObjectId
+  ): Promise<Video> {
+    const video = await this.videoModel.findOne({
+      _id: updateVideoDto._id,
+      userId
+    });
+
+    if (!video) {
+      throw new NotFoundException('Video not found or you do not have access to it');
+    }
+
+    return this.videoModel.findByIdAndUpdate(
+      updateVideoDto._id,
+      { ...updateVideoDto },
+      { new: true }
+    );
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} video`;
+  async remove(_id: string, userId: Types.ObjectId): Promise<any> {
+    if (!mongoose.isValidObjectId(_id)) {
+      throw new BadRequestException("Id is not in correct mongodb format");
+    }
+    const video = await this.videoModel.findOne({
+      _id,
+      userId
+    });
+    if (!video) {
+      throw new Error('You do not have permission to delete this video');
+    }
+    return this.videoModel.deleteOne({ _id });
   }
 }
