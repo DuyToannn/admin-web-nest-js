@@ -16,6 +16,7 @@ import { CategoriesModule } from './modules/categories/categories.module';
 import { CloudinaryModule } from './modules/cloudinary/cloudinary.module';
 import { RolesGuard } from './auth/passport/roles.guard';
 import { VideoManagementModule } from './modules/video-management/video-management.module';
+import { DropboxManageModule } from './modules/dropbox-manage/dropbox-manage.module';
 
 @Module({
   imports: [
@@ -62,6 +63,7 @@ import { VideoManagementModule } from './modules/video-management/video-manageme
 
     }),
     VideoManagementModule,
+    DropboxManageModule,
   ],
   controllers: [AppController],
   providers: [
