@@ -103,4 +103,14 @@ export class CategoriesService {
     }
     return this.categoryModel.deleteOne({ _id });
   }
+
+  async toggleCategoryVisibility(id: Types.ObjectId, userId: Types.ObjectId): Promise<Category> {
+    const category = await this.categoryModel.findOne({ _id: id, userId }).exec();
+    if (!category) {
+      throw new NotFoundException('Category not found or you do not have access to it');
+    }
+
+    category.isActive = !category.isActive; // Toggle the isActive status
+    return await category.save();
+  }
 }

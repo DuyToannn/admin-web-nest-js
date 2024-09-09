@@ -66,4 +66,12 @@ export class CategoriesController {
     const userId = user._id;
     return this.categoriesService.remove(id, userId);
   }
+
+  @Post('hide/:id') // Endpoint to hide a category
+  async toggleCategoryVisibility(@Param('id') id: string, @Req() req: Request) {
+    const user = req.user as UserDocument;
+    const userId = user._id;
+    const categoryId = new Types.ObjectId(id);
+    return this.categoriesService.toggleCategoryVisibility(categoryId, userId);
+  }
 }

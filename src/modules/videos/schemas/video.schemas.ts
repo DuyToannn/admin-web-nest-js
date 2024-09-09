@@ -1,4 +1,5 @@
 import { Category } from '@/modules/categories/schema/category.schema';
+import { User } from '@/modules/users/schemas/user.schema';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument, Types } from 'mongoose';
 
@@ -9,11 +10,14 @@ export class Video {
     // Thông tin liên quan đến người dùng
     @Prop({ type: Types.ObjectId, ref: 'User', required: true }) // Thêm trường userId tham chiếu tới User
     userId: Types.ObjectId;
-
+    @Prop({ type: Types.ObjectId, ref: User.name }) // Thêm trường user tham chiếu tới User
+    user: Types.ObjectId;
     // Thông tin cơ bản về video
     @Prop({ required: true })
     title: string;
 
+    @Prop({ required: true })
+    embed: string;
 
     @Prop({ type: Types.ObjectId, ref: Category.name })
     category: Types.ObjectId;
@@ -28,36 +32,38 @@ export class Video {
     @Prop()
     poster: string;
 
-    // Trạng thái của video
-    @Prop({
-        type: Number,
-        enum: [0, 1, 2, 3],
-        default: 0
-    })
-    status: number;
-
-    // Thông tin về kích thước và URL
-    @Prop({ type: Number })
+    @Prop()
     size: number;
 
     @Prop()
-    m3u8_url: string;
+    resolution: string;
 
     @Prop()
-    embed_url: string;
+    duration: number;
 
     @Prop()
     dropbox_url: string;
 
-    // Thông tin về quyền riêng tư và thống kê
     @Prop({ default: false })
     isPublic: boolean;
 
-    @Prop({ type: Number })
-    duration: number;
+    @Prop()
+    encodedUrl?: string;
 
-    @Prop({ type: Number, default: 0 })
-    views: number;
+    @Prop()
+    uuid?: string;
+
+    @Prop()
+    idVideo?: string;
+
+    @Prop()
+    filename?: string;
+
+    @Prop()
+    rlkey?: string;
+
+    @Prop()
+    st?: string;
 }
 
 export const VideoSchema = SchemaFactory.createForClass(Video);

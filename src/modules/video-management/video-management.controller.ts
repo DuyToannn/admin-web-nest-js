@@ -49,10 +49,10 @@ export class VideoManagementController {
 
   }
   @Get('all')
-  @Roles('admin') // Optional: chỉ cho phép admin xem tất cả video
-  @UseGuards(RolesGuard) // Optional: sử dụng guard để kiểm tra quyền truy cập
+  @Roles('admin') 
+  @UseGuards(RolesGuard)
   async findAllVideos(): Promise<VideoManagement[]> {
-    return this.videoManagementService.findAllVideos(); // Gọi service để lấy tất cả video
+    return this.videoManagementService.findAllVideos(); 
   }
 
 
@@ -65,6 +65,6 @@ export class VideoManagementController {
     const user = req.user as UserDocument;
     const userId = user._id;
 
-    return this.videoManagementService.findAllVideosByUser(query, +current, +pageSize, userId); // Gọi service để lấy video theo userId
+    return this.videoManagementService.findAllVideosByUser(query, +current, +pageSize, userId); 
   }
 }

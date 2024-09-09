@@ -13,16 +13,12 @@ import axios from 'axios';
 export class VideosController {
   constructor(private readonly videosService: VideosService) { }
 
-
   @Get('all')
   @Roles('admin')
   @UseGuards(RolesGuard)
-  async findAllVideos(@Req() req: Request): Promise<Video[]> {
-    const user = req.user as UserDocument;
+  async findAllVideos(@Req() req: Request): Promise<{ videos: Video[] }> {
     return this.videosService.findAllVideos();
   }
-
-
 
   @Get()
   findAll(
@@ -37,7 +33,7 @@ export class VideosController {
   }
 
   @Get(':id')
-  async findOne(@Param('id') id: string, @Req() req: Request): Promise<Video> {
+  async findOne(@Param('id') id: string, @Req() req: Request): Promise<{ video: Video; user: any }> {
     const user = req.user as UserDocument;
     const userId = user._id;
     const videoId = new Types.ObjectId(id);
@@ -50,7 +46,7 @@ export class VideosController {
 
 
   @Post()
-  async create(@Body() createVideoDto: CreateVideoDto, @Req() req: Request): Promise<Video> {
+  async create(@Body() createVideoDto: CreateVideoDto, @Req() req: Request,): Promise<{ video: Video; user: any }> {
     const user = req.user as UserDocument;
     const userId = user._id;
     return this.videosService.create(createVideoDto, userId);
@@ -71,6 +67,35 @@ export class VideosController {
     return this.videosService.remove(id, userId);
   }
 
+  @Public()
+  @Get('stream/:uuid')
+  async streamVideoByUUID(
+    @Param('uuid') uuid: string,
+    @Res() res: Response
+  ) {
+    const videoInfo = await this.videosService.getVideoInfoByUUID(uuid);
+    if (!videoInfo) {
+      throw new HttpException('Video not found.', HttpStatus.NOT_FOUND);
+    }
 
+    const { idVideo, filename, rlkey, st } = videoInfo;
+    const dropboxLink = `https://www.dropbox.com/scl/fi/${idVideo}/${filename}?rlkey=${rlkey}&st=${st}&raw=1`;
+    res.setHeader('Content-Type', 'video/mp4');
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Content-Disposition', `inline; filename="${filename}"`);
+    try {
+      const response = await axios({
+        url: dropboxLink,
+        method: 'GET',
+        responseType: 'stream',
+        headers: { 'Accept': 'video/mp4' },
+      });
+
+      response.data.pipe(res);
+    } catch (error) {
+      console.error('Error fetching video:', error.message);
+      throw new HttpException('Error streaming video.', HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+  }
 
 }

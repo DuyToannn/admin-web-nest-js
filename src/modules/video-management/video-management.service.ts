@@ -8,7 +8,7 @@ import aqp from 'api-query-params';
 
 @Injectable()
 export class VideoManagementService {
-  
+
   constructor(
     @InjectModel(VideoManagement.name) private readonly videoManagementModel: Model<VideoManagement>,
   ) { }
@@ -43,6 +43,11 @@ export class VideoManagementService {
     });
 
     return videoManagement.save();
+  }
+  async getVideoInfoByUUID(uuid: string): Promise<any> {
+    // Tìm thông tin video dựa trên UUID
+    const videoInfo = await this.videoManagementModel.findOne({ uuid }).exec(); // Giả sử bạn đã lưu UUID trong cơ sở dữ liệu
+    return videoInfo;
   }
 
   async findAllVideos(): Promise<VideoManagement[]> {

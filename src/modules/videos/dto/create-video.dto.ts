@@ -1,4 +1,4 @@
-import { IsEnum, IsMongoId, IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import { IsEnum, IsMongoId, IsNotEmpty, IsOptional, IsString, IsNumber } from 'class-validator';
 import { Types } from 'mongoose';
 
 export class CreateVideoDto {
@@ -7,25 +7,13 @@ export class CreateVideoDto {
     @IsString()
     title: string;
 
+    @IsString()
+    embed: string;
 
     @IsOptional()
     @IsString()
     poster?: string;
 
-    @IsOptional()
-    @IsString()
-    status?: number;
-
-    @IsOptional()
-    size?: number;
-
-    @IsOptional()
-    @IsString()
-    m3u8_url?: string;
-
-    @IsOptional()
-    @IsString()
-    embed_url?: string;
 
     @IsOptional()
     @IsString()
@@ -34,11 +22,16 @@ export class CreateVideoDto {
     @IsOptional()
     isPublic?: boolean;
 
-    @IsOptional()
-    duration?: number;
 
     @IsOptional()
-    views?: number;
+    size: number;
+
+    @IsOptional()
+    @IsString()
+    resolution: string;
+
+    @IsOptional()
+    duration: number;
 
     @IsOptional()
     @IsMongoId()
@@ -46,4 +39,24 @@ export class CreateVideoDto {
     @IsString()
     @IsEnum(['movie', 'series'])
     type_movie?: 'movie' | 'series';
+
+    @IsString()
+    @IsOptional()
+    idVideo?: string;
+
+    @IsString()
+    @IsOptional()
+    filename?: string;
+
+    @IsString()
+    @IsOptional()
+    rlkey?: string;
+
+    @IsString()
+    @IsOptional()
+    st?: string;
+
+    @IsString()
+    @IsOptional()
+    uuid?: string;
 }

@@ -12,9 +12,8 @@ export class UpdateVideoDto extends PartialType(CreateVideoDto) {
     @IsOptional()
     title?: string;
 
-
-
-
+    @IsOptional()
+    embed?: string;
     @IsOptional()
     @IsMongoId()
     category?: Types.ObjectId;
@@ -28,21 +27,6 @@ export class UpdateVideoDto extends PartialType(CreateVideoDto) {
     poster?: string;
 
     
-    @IsOptional()
-    status?: number;
-
-    
-    @IsOptional()
-    size?: number;
-
-    
-    @IsOptional()
-    m3u8_url?: string;
-
-    
-    @IsOptional()
-    embed_url?: string;
-
     
     @IsOptional()
     dropbox_url?: string;
@@ -51,11 +35,4 @@ export class UpdateVideoDto extends PartialType(CreateVideoDto) {
     @IsOptional()
     isPublic?: boolean;
 
-    
-    @IsOptional()
-    duration?: number;
-
-    
-    @IsOptional()
-    views?: number;
 }
