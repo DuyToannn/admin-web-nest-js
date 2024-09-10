@@ -19,8 +19,7 @@ export class CloudinaryService {
   }
 
   async uploadImage(file: Express.Multer.File): Promise<any> {
-    const uploadResult: UploadApiResponse = await cloudinary.uploader.upload(file.path, { folder: 'uploads' });
-
+    const uploadResult: UploadApiResponse = await cloudinary.uploader.upload(file.path);
     return {
       public_id: uploadResult.public_id,
       url: uploadResult.secure_url,

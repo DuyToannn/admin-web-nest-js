@@ -9,7 +9,10 @@ import { v4 as uuidv4 } from 'uuid';
 import aqp from 'api-query-params';
 import { User } from '../users/schemas/user.schema';
 import { Dropbox } from 'dropbox';
+import { Request, Response } from 'express';
+
 import axios from 'axios';
+import { DropboxManageService } from '../dropbox-manage/dropbox-manage.service';
 
 @Injectable()
 export class VideosService {
@@ -19,8 +22,8 @@ export class VideosService {
     @InjectModel(Video.name) private videoModel: Model<Video>,
     @InjectModel(User.name) private userModel: Model<User>,
     private categoriesService: CategoriesService,
+    private dropboxManageService: DropboxManageService,
   ) {
-    this.dropbox = new Dropbox({ accessToken: process.env.DROPBOX_ACCESS_TOKEN });
   }
 
   async getVideoInfoByUUID(uuid: string): Promise<any> {
@@ -35,6 +38,7 @@ export class VideosService {
   async create(
     createVideoDto: CreateVideoDto,
     userId: Types.ObjectId,
+
   ): Promise<{ video: Video; user: any }> {
     let encodedUrl: string;
     if (createVideoDto.category) {
@@ -60,17 +64,13 @@ export class VideosService {
       createVideoDto.st = st;
 
       try {
-        const metadata = await this.dropbox.filesGetMetadata({
-          include_deleted: false,
-          include_has_explicit_shared_members: false,
-          include_media_info: true,
-          path: `/${filename}`
-        });
-        if (metadata.result && 'size' in metadata.result) {
-          createVideoDto.size = metadata.result.size;
+        // Use DropboxManageService to get metadata
+        const metadata = await this.dropboxManageService.getFileMetadata(`/${filename}`);
+        if (metadata && 'size' in metadata) {
+          createVideoDto.size = metadata.size;
         }
-        if (metadata.result && 'media_info' in metadata.result) {
-          const mediaInfo = metadata.result.media_info;
+        if (metadata && 'media_info' in metadata) {
+          const mediaInfo = metadata.media_info;
           if (mediaInfo && mediaInfo['.tag'] === 'metadata' && 'metadata' in mediaInfo) {
             const videoMetadata = mediaInfo.metadata;
             if ('dimensions' in videoMetadata) {
@@ -80,6 +80,10 @@ export class VideosService {
               createVideoDto.duration = Math.round(videoMetadata.duration);
             }
           }
+        }
+
+        if (!createVideoDto.title && 'name' in metadata) {
+          createVideoDto.title = metadata.name.replace(/\.[^/.]+$/, ""); // Remove file extension
         }
       } catch (error) {
         console.error('Error fetching video metadata from Dropbox:', error);
@@ -93,7 +97,6 @@ export class VideosService {
     });
 
     const savedVideo = await video.save();
-
     const user = await this.userModel.findById(userId).select('email name role');
 
     return {

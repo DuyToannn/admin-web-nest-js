@@ -36,7 +36,6 @@ export class CategoriesService {
     if (filter.current) delete filter.current;
     if (filter.pageSize) delete filter.pageSize;
 
-    // Lọc theo userId
     filter['userId'] = userId;
 
     if (!current) current = 1;

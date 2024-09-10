@@ -46,7 +46,7 @@ export class VideosController {
 
 
   @Post()
-  async create(@Body() createVideoDto: CreateVideoDto, @Req() req: Request,): Promise<{ video: Video; user: any }> {
+  async create(@Body() createVideoDto: CreateVideoDto, @Req() req: Request): Promise<{ video: Video; user: any }> {
     const user = req.user as UserDocument;
     const userId = user._id;
     return this.videosService.create(createVideoDto, userId);

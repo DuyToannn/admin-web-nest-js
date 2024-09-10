@@ -6,13 +6,15 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { CategoriesModule } from '../categories/categories.module';
 import { CloudinaryModule } from '../cloudinary/cloudinary.module';
 import { UsersModule } from '../users/users.module';
+import { DropboxManageModule } from '../dropbox-manage/dropbox-manage.module';
 
 @Module({
   imports: [
     MongooseModule.forFeature([{ name: Video.name, schema: VideoSchema }]),
     CategoriesModule,
     CloudinaryModule,
-    UsersModule
+    UsersModule,
+    DropboxManageModule
   ], controllers: [VideosController],
   providers: [VideosService],
 })

@@ -13,7 +13,7 @@ export class Video {
     @Prop({ type: Types.ObjectId, ref: User.name }) // Thêm trường user tham chiếu tới User
     user: Types.ObjectId;
     // Thông tin cơ bản về video
-    @Prop({ required: true })
+    @Prop({ required: false })
     title: string;
 
     @Prop({ required: true })
