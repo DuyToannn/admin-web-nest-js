@@ -16,7 +16,7 @@ export class Video {
     @Prop({ required: false })
     title: string;
 
-    @Prop({ required: true })
+    @Prop({ required: false })
     embed: string;
 
     @Prop({ type: Types.ObjectId, ref: Category.name })
